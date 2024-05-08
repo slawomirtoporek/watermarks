@@ -1,5 +1,6 @@
 const Jimp = require('jimp');
 const inquirer = require('inquirer');
+const { existsSync } = require('fs');
 
 const addTextWatermarkToImage = async function(inputFile, outputFile, text) {
   const image = await Jimp.read(inputFile);
@@ -65,7 +66,14 @@ const startApp = async () => {
       message: 'Type your watermark text:',
     }]);
     options.watermarkText = text.value;
-    addTextWatermarkToImage('./img/' + options.inputImage, './img/' + prepareOutputFilename(options.inputImage), options.watermarkText);
+
+    if (existsSync(`./img/${options.inputImage}`)) {
+      addTextWatermarkToImage('./img/' + options.inputImage, './img/' + prepareOutputFilename(options.inputImage), options.watermarkText);
+      startApp();
+    } else {
+      console.log('Something went wrong... Try again.')
+    };
+
   } else {
     const image = await inquirer.prompt([{
       name: 'filename',
@@ -74,7 +82,13 @@ const startApp = async () => {
       default: 'logo.png',
     }]);
     options.watermarkImage = image.filename;
-    addImageWatermarkToImage('./img/' + options.inputImage, './img/' + prepareOutputFilename(options.inputImage), './img/' + options.watermarkImage);
+    
+     if (existsSync(`./img/${options.inputImage}`) && existsSync(`./img/${options.watermarkImage}`)) {
+      addImageWatermarkToImage('./img/' + options.inputImage, './img/' + prepareOutputFilename(options.inputImage), './img/' + options.watermarkImage);
+      startApp();
+    } else {
+      console.log('Something went wrong... Try again.')
+    };
   }
 }
 
